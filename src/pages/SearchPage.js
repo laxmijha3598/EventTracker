@@ -3,6 +3,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 const SearchPage = () => {
   const [events, setEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedDate, setSelectedDate] = useState('Today');
+  const [selectedTime, setSelectedTime] = useState('Morning');
+
   const location = useLocation();
   const navigate = useNavigate();
   const query = new URLSearchParams(location.search);
@@ -17,13 +21,16 @@ const SearchPage = () => {
     }
   }, [state, city]);
 
-  const handleBook = (event) => {
-    const booking = {
-      ...event,
-      date: new Date().toLocaleDateString(),
-      time: 'Morning',
-    };
+  const handleBookClick = (event) => {
+    setSelectedEvent(event); // show booking options before booking
+  };
 
+  const confirmBooking = () => {
+    const booking = {
+      ...selectedEvent,
+      date: selectedDate,
+      time: selectedTime,
+    };
     const existing = JSON.parse(localStorage.getItem('bookings') || '[]');
     localStorage.setItem('bookings', JSON.stringify([...existing, booking]));
     navigate('/my-bookings');
@@ -37,9 +44,20 @@ const SearchPage = () => {
           <h3>{event.eventName}</h3>
           <p>{event.address}</p>
           <p>Rating: {event.rating}</p>
-          <button onClick={() => handleBook(event)}>Book FREE Event</button>
+          <button onClick={() => handleBookClick(event)}>Book FREE Event</button>
         </div>
       ))}
+
+      {selectedEvent && (
+        <div>
+          <h2>Select Date and Time</h2>
+          <p onClick={() => setSelectedDate('Today')}>Today</p>
+          <p onClick={() => setSelectedTime('Morning')}>Morning</p>
+          <p onClick={() => setSelectedTime('Afternoon')}>Afternoon</p>
+          <p onClick={() => setSelectedTime('Evening')}>Evening</p>
+          <button onClick={confirmBooking}>Confirm Booking</button>
+        </div>
+      )}
     </div>
   );
 };
